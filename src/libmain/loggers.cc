@@ -8,17 +8,28 @@ LogFormat defaultLogFormat = LogFormat::raw;
 
 LogFormat parseLogFormat(const std::string & logFormatStr)
 {
-    if (logFormatStr == "raw" || getEnv("NIX_GET_COMPLETIONS"))
+    static const std::map<std::string_view, LogFormat> formatMap = {
+        {"raw", LogFormat::raw},
+        {"raw-with-logs", LogFormat::rawWithLogs},
+        {"internal-json", LogFormat::internalJSON},
+        {"bar", LogFormat::bar},
+        {"bar-with-logs", LogFormat::barWithLogs}};
+
+    if (getEnv("NIX_GET_COMPLETIONS"))
         return LogFormat::raw;
-    else if (logFormatStr == "raw-with-logs")
-        return LogFormat::rawWithLogs;
-    else if (logFormatStr == "internal-json")
-        return LogFormat::internalJSON;
-    else if (logFormatStr == "bar")
-        return LogFormat::bar;
-    else if (logFormatStr == "bar-with-logs")
-        return LogFormat::barWithLogs;
-    throw Error("option 'log-format' has an invalid value '%s'", logFormatStr);
+
+    for (const auto & [name, fmt] : formatMap)
+        if (name == logFormatStr)
+            return fmt;
+
+    std::string validValues;
+    for (const auto & [name, _] : formatMap) {
+        if (!validValues.empty())
+            validValues += ", ";
+        validValues += name;
+    }
+
+    throw Error("option 'log-format' has an invalid value '%s'. Valid values are %s.", logFormatStr, validValues);
 }
 
 std::unique_ptr<Logger> makeDefaultLogger()
