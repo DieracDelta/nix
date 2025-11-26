@@ -177,6 +177,13 @@ struct DerivationBuilder : RestrictionContext
      * killed.
      */
     virtual bool killChild() = 0;
+
+    /**
+     * Get the builder UID
+     *
+     * @returns the builder UID if run on localhost (e.g. if it exists)
+     */
+    virtual std::optional<uid_t> getBuilderUID() const = 0;
 };
 
 #ifndef _WIN32 // TODO enable `DerivationBuilder` on Windows

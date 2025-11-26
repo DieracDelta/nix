@@ -396,6 +396,8 @@ public:
 
     bool killChild() override;
 
+    std::optional<uid_t> getBuilderUID() const override;
+
 private:
 
     bool decideWhetherDiskFull();
@@ -473,6 +475,13 @@ bool DerivationBuilderImpl::killChild()
         pid.wait();
     }
     return ret;
+}
+
+std::optional<uid_t> DerivationBuilderImpl::getBuilderUID() const
+{
+    if (buildUser)
+        return buildUser->getUID();
+    return std::nullopt;
 }
 
 SingleDrvOutputs DerivationBuilderImpl::unprepareBuild()
